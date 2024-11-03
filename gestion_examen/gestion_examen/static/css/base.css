@@ -1,0 +1,71 @@
+* {
+    font-family: Kodchasan;
+}
+
+.ultimo {
+    position: absolute;
+    bottom: 10px;
+    left: 3%;
+}
+
+.textoI {
+    width: 100%;
+    max-width: 400px;
+    padding: 2rem;
+    margin: 0 auto; /* Ensure the element is centered */
+    align-items: center;
+    justify-content: center;
+}
+
+.boton {
+    display: flex;
+    justify-content: center;
+}
+
+.form-control {
+    border-color: #1d985a;
+    border-style: double;
+}
+
+.form-control input {
+    border-style: solid;
+}
+
+/* Media queries for mobile adaptation */
+@media screen and (max-width: 1100px) {
+    .escudo, .escudoverde, .izquierdo, .izquierdoimg, footer {
+        display: none;
+    }
+
+    .centrar {
+        text-align: center;
+    }
+
+    .textoI {
+        text-align: center;
+        padding: 1rem; /* Adjust padding for mobile view */
+    }
+
+    .boton {
+        text-align: center;
+    }
+}
+
+@media screen and (max-width: 768px) {
+    .container {
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    }
+
+    h5{
+        display: none;
+    }
+
+    .textoI {
+        width: 100%; /* Ensure it takes full width on mobile */
+        margin: auto;
+    }
+}

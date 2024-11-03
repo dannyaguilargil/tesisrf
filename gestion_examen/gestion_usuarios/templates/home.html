@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block contenido %}
+<div class="container vh-100 d-flex flex-column align-items-center justify-content-center">
+    <h5 class="text-center mb-3">Sistema de reconocimiento facial para examenes en linea</h5>
+    <div class="form-control textoI" style="font-family: Lato; max-width: 400px; width: 100%;">
+        <form action="" method="POST">
+            {% csrf_token %}
+            <div class="text-center mb-3">
+                <img src="{% static 'imgs/logounemi.jpg' %}" alt="" style="width: 170px; height: 70px;">
+            </div>
+            <label class="TT" for="username"><b>Usuario</b></label>
+            <input type="text" class="form-control" name="username" id="username" placeholder="Usuario" required><br>
+            <label class="TT" for="password"><b>Contraseña</b></label>
+            <input type="password" class="form-control" name="password" id="password" placeholder="Contraseña" required><br>
+            <div class="boton mb-3">
+                <input type="submit" class="text-center btn btn-success" name="login" value="Iniciar sesión" style="font-family: Lato;">
+            </div>
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-danger">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+            
+        </form>
+    </div> <br>
+    <center>
+ 
+      Mora Loor Evelyn Fabiola / 
+      Ponce Flores Victor Manuel
+      
+    </center>
+</div>
+{% endblock contenido %}
