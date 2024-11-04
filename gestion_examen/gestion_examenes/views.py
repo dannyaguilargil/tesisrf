@@ -1,3 +1,5 @@
-from django.shortcuts import render
+from django.shortcuts import render,redirect
 
-# Create your views here.
+def presentarexamen(request):
+    username = request.user.username
+    return render(request, 'examenes.html', {'username': username})

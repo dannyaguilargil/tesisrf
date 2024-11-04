@@ -3,6 +3,7 @@ from django.contrib.auth import authenticate, login
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib import messages
 import os
+from django.contrib.auth import logout as django_logout
 # Create your views here.
 ################LOGIN####################
 def home(request):
@@ -38,3 +39,8 @@ def home(request):
 
     return render(request, 'home.html', {'form': form})
 ################LOGIN####################
+
+#logout de la pagina
+def logout(request):
+    django_logout(request)
+    return redirect('login')

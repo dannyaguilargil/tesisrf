@@ -24,4 +24,6 @@ from django.shortcuts import render, redirect
 urlpatterns = [
     path('', views.home, name='casita'),
     path('login', views.home, name='inicio'),
+    path('login', views.logout, name='logout'),
+    
 ]+ static(settings.STATIC_URL, document_root=settings.STATICFILES_DIRS)

@@ -1,0 +1,25 @@
+{% extends 'base_examen.html' %}
+{% load static %}
+
+{% block contenido %}
+<div class="card text-center">
+  <div class="card-header">
+    <ul class="nav nav-tabs card-header-tabs">
+      <li class="nav-item">
+        <a class="nav-link active" aria-current="true" href="#">Autenticacion</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="#">Presenta examen</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link disabled" aria-disabled="true">Disabled</a>
+      </li>
+    </ul>
+  </div>
+  <div class="card-body">
+    <h5 class="card-title">Examen pendiente.... hasta las ...</h5>
+    <p class="card-text">Antes de inicialr la evaluacion debe validar el reconocimiento facial</p>
+    <a href="#" class="btn btn-primary">Validar reconocimiento facial</a>
+  </div>
+</div>
+{% endblock contenido %}

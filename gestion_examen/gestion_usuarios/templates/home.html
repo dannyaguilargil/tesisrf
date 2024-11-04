@@ -3,7 +3,7 @@
 
 {% block contenido %}
 <div class="container vh-100 d-flex flex-column align-items-center justify-content-center">
-    <h5 class="text-center mb-3">Sistema de reconocimiento facial para examenes en linea</h5>
+    <h5 class="text-center mb-3">Reconocimiento facial para examenes en linea</h5>
     <div class="form-control textoI" style="font-family: Lato; max-width: 400px; width: 100%;">
         <form action="" method="POST">
             {% csrf_token %}
@@ -15,7 +15,7 @@
             <label class="TT" for="password"><b>Contraseña</b></label>
             <input type="password" class="form-control" name="password" id="password" placeholder="Contraseña" required><br>
             <div class="boton mb-3">
-                <input type="submit" class="text-center btn btn-success" name="login" value="Iniciar sesión" style="font-family: Lato;">
+                <input type="submit" class="text-center btn btn-secondary" name="login" value="Iniciar sesión" style="font-family: Lato;">
             </div>
             {% if messages %}
                 {% for message in messages %}
