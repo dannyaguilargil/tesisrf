@@ -1,0 +1,26 @@
+{% extends 'base_examen.html' %}
+{% load static %}
+
+{% block contenido %}
+<div class="card text-center">
+  <div class="card-header">
+    <ul class="nav nav-tabs card-header-tabs">
+      <li class="nav-item">
+        <a class="nav-link" href="#">Autenticacion</a>
+      </li>
+      <li class="nav-item">
+      
+        <a class="nav-link active" aria-current="true" href="#">Presentar examen</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link disabled" aria-disabled="true">Disabled</a>
+      </li>
+    </ul>
+  </div>
+  <div class="card-body">
+   
+    <h1>NO HAY EXAMENES EN LA FECHA ACTUAL</h1>
+    
+  </div>
+</div>
+{% endblock contenido %}

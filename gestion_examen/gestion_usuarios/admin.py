@@ -8,7 +8,7 @@ class Imagen(admin.ModelAdmin):
     search_fields = ('usuario',)#cuadrito de busqueda dentro del panel de administracion
 
 
-    def display_archivo(self, obj):
+    def display_imagen(self, obj):
             if obj.imagen:
                 file_url = obj.imagen.url
                 file_url = file_url.replace('/gestion_examen/', '/')
@@ -16,7 +16,7 @@ class Imagen(admin.ModelAdmin):
                 return format_html('<a href="{}" target="_blank";>Ver imagen</a>', file_url)
             else:
                 return '-'
-    display_archivo.short_description = 'Archivo'
+    display_imagen.short_description = 'Archivo'
 
 
 admin.site.register(imagenes, Imagen)

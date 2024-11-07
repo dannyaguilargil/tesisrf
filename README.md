@@ -1,2 +1,2 @@
 # tesisrf
-Proyecto de grado con reconocimiento facial
+Reconocimiento facial para examenes en linea

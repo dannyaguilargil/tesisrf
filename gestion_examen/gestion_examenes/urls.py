@@ -6,5 +6,6 @@ from . import views
 from django.shortcuts import render, redirect
 
 urlpatterns = [
-   path('examenes', views.presentarexamen, name='examenes'),
+   path('examen', views.examenes, name='examen'),
+   path('examen/presentar', views.presentarexamen, name='presentarexamen'),
 ]

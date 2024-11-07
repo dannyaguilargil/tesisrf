@@ -6,10 +6,10 @@
   <div class="card-header">
     <ul class="nav nav-tabs card-header-tabs">
       <li class="nav-item">
-        <a class="nav-link active" aria-current="true" href="#">Autenticacion</a>
+        <a class="nav-link active" aria-current="true" href="{% url 'examen' %}">Autenticación</a>
       </li>
       <li class="nav-item">
-        <a class="nav-link" href="#">Presenta examen</a>
+        <a class="nav-link" href="{% url 'presentarexamen' %}">Presentar examen</a>
       </li>
       <li class="nav-item">
         <a class="nav-link disabled" aria-disabled="true">Disabled</a>
@@ -18,8 +18,49 @@
   </div>
   <div class="card-body">
     <h5 class="card-title">Examen pendiente.... hasta las ...</h5>
-    <p class="card-text">Antes de inicialr la evaluacion debe validar el reconocimiento facial</p>
-    <a href="#" class="btn btn-primary">Validar reconocimiento facial</a>
+    <p class="card-text">Antes de iniciar la evaluación debe validar el reconocimiento facial</p>
+
+    <!-- Video para mostrar la cámara -->
+    <video id="video" width="300" height="200" autoplay></video>
+    <br> <br>
+    <button id="capture" class="btn btn-primary">Validar reconocimiento facial</button>
+
+    <!-- Canvas para capturar la imagen -->
+    <canvas id="canvas" width="300" height="200" style="display: none;"></canvas>
+
+    <!-- Formulario para enviar la imagen capturada -->
+    <form id="uploadForm" method="POST" enctype="multipart/form-data" action="">
+      {% csrf_token %}
+      <input type="hidden" name="image_data" id="image_data">
+      <button type="submit" class="btn btn-success" style="display: none;">Enviar para validación</button>
+    </form>
   </div>
 </div>
+
+<script>
+  // Acceder a la cámara del usuario
+  const video = document.getElementById('video');
+  const canvas = document.getElementById('canvas');
+  const captureButton = document.getElementById('capture');
+  const uploadForm = document.getElementById('uploadForm');
+  const imageDataInput = document.getElementById('image_data');
+
+  // Pedir permisos de cámara
+  navigator.mediaDevices.getUserMedia({ video: true })
+    .then(stream => {
+      video.srcObject = stream;
+    })
+    .catch(error => {
+      console.error("Error al acceder a la cámara: ", error);
+    });
+
+  // Capturar la imagen de la cámara
+  captureButton.addEventListener('click', () => {
+    const context = canvas.getContext('2d');
+    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+    const imageDataURL = canvas.toDataURL('image/png');
+    imageDataInput.value = imageDataURL;
+    uploadForm.submit();  
+  });
+</script>
 {% endblock contenido %}

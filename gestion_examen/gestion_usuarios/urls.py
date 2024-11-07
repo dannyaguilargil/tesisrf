@@ -26,4 +26,4 @@ urlpatterns = [
     path('login', views.home, name='inicio'),
     path('login', views.logout, name='logout'),
     
-]+ static(settings.STATIC_URL, document_root=settings.STATICFILES_DIRS)
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
