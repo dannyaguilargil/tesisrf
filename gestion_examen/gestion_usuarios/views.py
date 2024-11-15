@@ -17,7 +17,7 @@ def home(request):
                 if user.is_staff:
                     login(request, user)
                     print("Inicio sesion el administrador")
-                    return redirect('admin:index')  
+                    return redirect('examen')  
                 elif user.groups.filter(name='informes').exists():
                     login(request, user)
                     print("Inicio sesión a gestion de informes")

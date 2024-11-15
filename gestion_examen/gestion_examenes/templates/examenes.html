@@ -12,17 +12,22 @@
         <a class="nav-link" href="{% url 'presentarexamen' %}">Presentar examen</a>
       </li>
       <li class="nav-item">
-        <a class="nav-link disabled" aria-disabled="true">Disabled</a>
+        <a class="nav-link disabled" aria-disabled="true">Crear examen</a>
       </li>
     </ul>
   </div>
   <div class="card-body">
-    <h5 class="card-title">Examen pendiente.... hasta las ...</h5>
-    <p class="card-text">Antes de iniciar la evaluación debe validar el reconocimiento facial</p>
+    {% if mensaje %}
+      <div class="alert alert-info">{{ mensaje }}</div>
+    {% endif %}
+
+    <h5 class="card-title">Examen de {{ examen.planificacion.materia }} - Sección: {{ examen.planificacion.seccion }}</h5>
+    <p class="card-text">Duración: {{ examen.duracion }} minutos | Número de intentos permitidos: {{ examen.nintentos }}</p>
+    <p class="card-text">Fecha de inicio: {{ examen.fechainicio }} | Fecha de finalización: {{ examen.fechafinal }}</p>
 
     <!-- Video para mostrar la cámara -->
     <video id="video" width="300" height="200" autoplay></video>
-    <br> <br>
+    <br><br>
     <button id="capture" class="btn btn-primary">Validar reconocimiento facial</button>
 
     <!-- Canvas para capturar la imagen -->
@@ -38,14 +43,13 @@
 </div>
 
 <script>
-  // Acceder a la cámara del usuario
   const video = document.getElementById('video');
   const canvas = document.getElementById('canvas');
   const captureButton = document.getElementById('capture');
   const uploadForm = document.getElementById('uploadForm');
   const imageDataInput = document.getElementById('image_data');
 
-  // Pedir permisos de cámara
+  // Pedir permisos de cámara y mostrar el video
   navigator.mediaDevices.getUserMedia({ video: true })
     .then(stream => {
       video.srcObject = stream;
@@ -60,7 +64,21 @@
     context.drawImage(video, 0, 0, canvas.width, canvas.height);
     const imageDataURL = canvas.toDataURL('image/png');
     imageDataInput.value = imageDataURL;
-    uploadForm.submit();  
+    uploadForm.submit();  // Enviar la imagen al servidor para validación
   });
 </script>
+
+
+{% if mensaje %}
+   
+    {% if mensaje == "Reconocimiento facial exitoso, puedes iniciar el examen." %}
+        <script>
+            setTimeout(function() {
+                window.location.href = "{% url 'presentarexamen' %}";
+            }, 2000);  
+        </script>
+    {% endif %}
+{% endif %}
+
+
 {% endblock contenido %}
