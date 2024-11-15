@@ -9,6 +9,7 @@ import base64
 import numpy as np
 from django.core.files.base import ContentFile
 from gestion_usuarios.models import imagenes
+from .forms import ExamenForm, PreguntaForm
 
 def staff_required(user):
     return user.is_staff 
@@ -69,7 +70,7 @@ def examenes(request):
                 correlacion = cv2.compareHist(hist_captura, hist_referencia, cv2.HISTCMP_CORREL)
 
              
-                if correlacion > 0.3: 
+                if correlacion > 0.2: 
                     return render(request, 'examenes.html', {
                         'examen': examen_obj,
                         'preguntas': pregunta.objects.filter(examen=examen_obj),
@@ -143,3 +144,34 @@ def presentarexamen(request):
             'username': username,
             'es_staff': es_staff
         })
+    
+@login_required
+def crear_examen(request):
+    
+    username = request.user.username
+    es_staff = request.user.is_staff
+    if request.method == 'POST':
+        examen_form = ExamenForm(request.POST)
+        if examen_form.is_valid():
+            # Guardar el examen
+            nuevo_examen = examen_form.save()
+
+            # Crear preguntas automáticamente si se especifica una cantidad
+            cantidad_preguntas = nuevo_examen.cantidadpreguntas
+            preguntas_creadas = []
+            for i in range(cantidad_preguntas):
+                preguntas_creadas.append(
+                    pregunta(examen=nuevo_examen, texto=f'Pregunta {i+1}')
+                )
+            pregunta.objects.bulk_create(preguntas_creadas)
+
+            return redirect('crear_examen')  # Redirige a una lista de exámenes o donde prefieras
+    else:
+        examen_form = ExamenForm()
+
+    return render(request, 'crearexamen.html',{
+        'examen_form': examen_form,
+        'username': username,
+        'es_staff': es_staff,
+
+    })

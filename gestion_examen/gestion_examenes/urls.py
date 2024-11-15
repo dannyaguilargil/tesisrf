@@ -8,4 +8,5 @@ from django.shortcuts import render, redirect
 urlpatterns = [
    path('examen', views.examenes, name='examen'),
    path('examen/presentar', views.presentarexamen, name='presentarexamen'),
+   path('examen/crear', views.crear_examen, name='crear_examen'),
 ]

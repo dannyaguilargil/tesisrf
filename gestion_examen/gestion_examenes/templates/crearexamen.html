@@ -1,0 +1,62 @@
+{% extends 'base_examen.html' %}
+{% load static %}
+
+{% block contenido %}
+<div class="card text-center">
+  <div class="card-header">
+    <ul class="nav nav-tabs card-header-tabs">
+      <li class="nav-item">
+        <a class="nav-link" href="{% url 'examen' %}">Autenticación</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="{% url 'presentarexamen' %}">Presentar examen</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link active" aria-current="true">Crear examen</a>
+      </li>
+    </ul>
+  </div>
+
+  <div class="card-body">
+    <div class="container mt-4">
+      <h2 class="text-primary mb-4">Crear un Nuevo Examen</h2>
+      
+      <form method="post" class="shadow p-4 bg-light rounded">
+        {% csrf_token %}
+        
+        <div class="mb-3">
+          {{ examen_form.fechainicio.label_tag }}
+          {{ examen_form.fechainicio }}
+        </div>
+        
+        <div class="mb-3">
+          {{ examen_form.fechafinal.label_tag }}
+          {{ examen_form.fechafinal }}
+        </div>
+        
+        <div class="mb-3">
+          {{ examen_form.cantidadpreguntas.label_tag }}
+          {{ examen_form.cantidadpreguntas }}
+        </div>
+        
+        <div class="mb-3">
+          {{ examen_form.duracion.label_tag }}
+          {{ examen_form.duracion }}
+        </div>
+        
+        <div class="mb-3">
+          {{ examen_form.nintentos.label_tag }}
+          {{ examen_form.nintentos }}
+        </div>
+        
+        <div class="mb-3">
+          {{ examen_form.planificacion.label_tag }}
+          {{ examen_form.planificacion }}
+        </div>
+        
+        <button type="submit" class="btn btn-success w-40">Crear Examen</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock contenido %}
