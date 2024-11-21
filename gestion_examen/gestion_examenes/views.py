@@ -20,11 +20,21 @@ def examenes(request):
     es_staff = request.user.is_staff
     fecha_actual = timezone.now().date()
 
-    
     examen_obj = examen.objects.filter(
         fechainicio__lte=fecha_actual,
         fechafinal__gte=fecha_actual
     ).select_related('planificacion').first()
+
+    imagen_base64_referencia = None
+
+    try:
+        # Obtener la imagen de referencia del usuario desde el modelo imagenes
+        imagen_referencia = imagenes.objects.get(usuario=request.user).imagen
+        with open(imagen_referencia.path, "rb") as img_file:
+            imagen_base64_referencia = base64.b64encode(img_file.read()).decode('utf-8')
+
+    except imagenes.DoesNotExist:
+        imagen_base64_referencia = None  # Si no hay imagen de referencia
 
     if request.method == 'POST' and 'image_data' in request.POST:
         # Decodificar la imagen enviada en base64
@@ -36,8 +46,8 @@ def examenes(request):
         np_img = np.frombuffer(image_data.read(), np.uint8)
         captura_image = cv2.imdecode(np_img, cv2.IMREAD_COLOR)
 
-        # Cargar la imagen de referencia del usuario desde el modelo `imagenes`
         try:
+            # Cargar la imagen de referencia del usuario desde el modelo imagenes
             imagen_referencia = imagenes.objects.get(usuario=request.user).imagen.path
             referencia_image = cv2.imread(imagen_referencia)
 
@@ -61,52 +71,61 @@ def examenes(request):
                 (x, y, w, h) = rostros_referencia[0]
                 referencia_rostro = gray_referencia[y:y+h, x:x+w]
 
-                
+                # Redimensionar rostros para comparación
                 captura_rostro = cv2.resize(captura_rostro, (100, 100))
                 referencia_rostro = cv2.resize(referencia_rostro, (100, 100))
 
-              
+                # Comparar histogramas
                 hist_captura = cv2.calcHist([captura_rostro], [0], None, [256], [0, 256])
                 hist_referencia = cv2.calcHist([referencia_rostro], [0], None, [256], [0, 256])
                 correlacion = cv2.compareHist(hist_captura, hist_referencia, cv2.HISTCMP_CORREL)
 
-             
-                if correlacion > 0.1: 
+                # Mostrar áreas detectadas en ambas imágenes para debugging
+                cv2.rectangle(captura_image, (x, y), (x + w, y + h), (0, 255, 0), 2)
+                cv2.rectangle(referencia_image, (x, y), (x + w, y + h), (0, 255, 0), 2)
+
+                # Mostrar correlación en consola para depuración
+                print(f"Correlación: {correlacion}")
+
+                if correlacion > 0.6:  # Reconocimiento facial más estricto
                     return render(request, 'examenes.html', {
                         'examen': examen_obj,
                         'preguntas': pregunta.objects.filter(examen=examen_obj),
                         'username': username,
                         'es_staff': es_staff,
-                        'mensaje': "Reconocimiento facial exitoso, puedes iniciar el examen."
-                        
+                        'mensaje': "Reconocimiento facial exitoso, puedes iniciar el examen.",
+                        'imagen_base64_referencia': imagen_base64_referencia,  # Imagen de referencia
                     })
                 else:
                     return render(request, 'examenes.html', {
                         'mensaje': "El rostro no coincide con el usuario autenticado. Inténtalo de nuevo.",
                         'username': username,
-                        'es_staff': es_staff
+                        'es_staff': es_staff,
+                        'imagen_base64_referencia': imagen_base64_referencia,
                     })
             else:
                 return render(request, 'examenes.html', {
                     'mensaje': "No se pudo detectar un rostro en la imagen capturada. Inténtalo de nuevo.",
                     'username': username,
-                    'es_staff': es_staff
+                    'es_staff': es_staff,
+                    'imagen_base64_referencia': imagen_base64_referencia,
                 })
         except imagenes.DoesNotExist:
             return render(request, 'examenes.html', {
                 'mensaje': "No se encontró una imagen de referencia para el usuario.",
                 'username': username,
-                'es_staff': es_staff
+                'es_staff': es_staff,
+                'imagen_base64_referencia': imagen_base64_referencia,
             })
 
-    # Si no se envía una imagen, mostrar el examen o el mensaje de no disponible
     if examen_obj:
         preguntas = pregunta.objects.filter(examen=examen_obj)
         return render(request, 'examenes.html', {
             'examen': examen_obj,
             'preguntas': preguntas,
             'username': username,
-            'es_staff': es_staff
+            'es_staff': es_staff,
+            'imagen_base64_referencia': imagen_base64_referencia,  # Imagen de referencia
         })
     else:
         return render(request, 'examen_no_disponible.html', {
@@ -114,7 +133,7 @@ def examenes(request):
             'username': username,
             'es_staff': es_staff
         })
-
+    
 def presentarexamen(request):
     username = request.user.username
     es_staff = request.user.is_staff
@@ -242,3 +261,9 @@ def crear_examen(request):
         'username': username,
         'es_staff': es_staff,
     })
+
+@login_required
+def  inicioexamen(request):
+     username = request.user.username
+     es_staff = request.user.is_staff 
+     return render(request, 'areapersonal.html', {'username': username, 'es_staff': es_staff}) 

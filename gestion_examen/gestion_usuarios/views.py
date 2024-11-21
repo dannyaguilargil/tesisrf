@@ -16,17 +16,17 @@ def home(request):
                 if user.is_staff:
                     login(request, user)
                     print("Inicio sesion el administrador")
-                    return redirect('examen')  
-                elif user.groups.filter(name='informes').exists():
+                    return redirect('inicioexamen')  
+                elif user.groups.filter(name='estudiante').exists():
                     login(request, user)
-                    print("Inicio sesión a gestion de informes")
-                    return redirect('informe')
+                    print("Inicio sesión el estudiante")
+                    return redirect('examen')
               
             
                 else:
-                    print("Inicio sesion el contratista")
+                    print("Inicio de sesion no conocido")
                     login(request, user)
-                    return redirect('identidades')
+                    return redirect('examen')
                    
         else:
             print("Usuario invalido")

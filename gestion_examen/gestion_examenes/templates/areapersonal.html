@@ -1,0 +1,31 @@
+{% extends 'base_examen.html' %}
+{% load static %}
+
+{% block contenido %}
+<div class="card text-center">
+  <div class="card-header">
+    <ul class="nav nav-tabs card-header-tabs">
+        <li class="nav-item">
+            <a class="nav-link active" aria-current="true"  href="{% url 'inicioexamen' %}">Inicio del sitio</a>
+          </li>
+      <li class="nav-item">
+        <a class="nav-link" href="{% url 'examen' %}">Autenticación</a>
+      </li>
+
+     
+      <li class="nav-item">
+      
+        <a class="nav-link" href="#">Presentar examen</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link disabled" aria-disabled="true">Crear examen</a>
+      </li>
+    </ul>
+  </div>
+  <div class="card-body">
+   
+    <h1>Inicio del sitio</h1>
+    <h5>No hay Examenes accedidos o creados recientemente</h5>
+  </div>
+</div>
+{% endblock contenido %}

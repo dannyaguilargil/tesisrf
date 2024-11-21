@@ -6,6 +6,9 @@
   <div class="card-header">
     <ul class="nav nav-tabs card-header-tabs">
       <li class="nav-item">
+        <a class="nav-link" href="{% url 'inicioexamen' %}">Inicio del sitio</a>
+      </li>
+      <li class="nav-item">
         <a class="nav-link active" aria-current="true" href="{% url 'examen' %}">Autenticación</a>
       </li>
       <li class="nav-item">
@@ -16,6 +19,7 @@
       </li>
     </ul>
   </div>
+
   <div class="card-body">
     {% if mensaje %}
       <div class="alert alert-info">{{ mensaje }}</div>
@@ -25,26 +29,42 @@
     <p class="card-text">Duración: {{ examen.duracion }} minutos | Número de intentos permitidos: {{ examen.nintentos }}</p>
     <p class="card-text">Fecha de inicio: {{ examen.fechainicio }} | Fecha de finalización: {{ examen.fechafinal }}</p>
 
-    <!-- Video para mostrar la cámara -->
-    <video id="video" width="300" height="200" autoplay></video>
-    <br><br>
-    <button id="capture" class="btn btn-primary">Validar reconocimiento facial</button>
+    <div class="row mt-4">
+      <!-- Imagen de referencia del usuario (lado izquierdo) -->
+      <div class="col-md-6">
+        <h5 class="text-center text-primary">Imagen de referencia</h5>
+        {% if imagen_base64_referencia %}
+          <img src="data:image/png;base64,{{ imagen_base64_referencia }}" class="img-fluid rounded shadow" alt="Imagen de referencia">
+        {% else %}
+          <p class="text-muted">No hay imagen de referencia disponible.</p>
+        {% endif %}
+      </div>
 
-    <!-- Canvas para capturar la imagen -->
-    <canvas id="canvas" width="300" height="200" style="display: none;"></canvas>
+      <!-- Video de la cámara (lado derecho) -->
+      <div class="col-md-6">
+        <h5 class="text-center text-primary">Imagen a capturar</h5>
+        {% if imagen_base64_capturada %}
+          <img src="data:image/png;base64,{{ imagen_base64_capturada }}" class="img-fluid rounded shadow" alt="Imagen capturada">
+        {% else %}
+          <video id="video" width="100%" autoplay class="rounded shadow"></video>
+        {% endif %}
+        <br><br>
+        <button id="capture" class="btn btn-primary w-100">Capturar imagen</button>
+      </div>
+    </div>
 
-    <!-- Formulario para enviar la imagen capturada -->
-    <form id="uploadForm" method="POST" enctype="multipart/form-data" action="">
+    <!-- Canvas y formulario para enviar la imagen capturada -->
+    <form id="uploadForm" method="POST" enctype="multipart/form-data" action="" class="mt-4">
       {% csrf_token %}
       <input type="hidden" name="image_data" id="image_data">
-      <button type="submit" class="btn btn-success" style="display: none;">Enviar para validación</button>
+      <button type="submit" class="btn btn-success w-100" style="display: none;">Enviar para validación</button>
     </form>
   </div>
 </div>
 
 <script>
   const video = document.getElementById('video');
-  const canvas = document.getElementById('canvas');
+  const canvas = document.getElementById('canvas') || document.createElement('canvas');
   const captureButton = document.getElementById('capture');
   const uploadForm = document.getElementById('uploadForm');
   const imageDataInput = document.getElementById('image_data');
@@ -61,13 +81,23 @@
   // Capturar la imagen de la cámara
   captureButton.addEventListener('click', () => {
     const context = canvas.getContext('2d');
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
     context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+    // Convertir la imagen capturada a Base64
     const imageDataURL = canvas.toDataURL('image/png');
     imageDataInput.value = imageDataURL;
+
+    // Limpiar el canvas para permitir una nueva captura
+    canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
+
+    // Activar el formulario para enviar la imagen
     uploadForm.submit();  // Enviar la imagen al servidor para validación
   });
-</script>
 
+
+</script>
 
 {% if mensaje %}
    
@@ -79,6 +109,5 @@
         </script>
     {% endif %}
 {% endif %}
-
 
 {% endblock contenido %}
