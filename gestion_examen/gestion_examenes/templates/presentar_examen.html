@@ -6,7 +6,7 @@
   <div class="card-header">
     <ul class="nav nav-tabs card-header-tabs">
       <li class="nav-item">
-        <a class="nav-link" href="{% url 'examen' %}">Autenticacion</a>
+        <a class="nav-link" href="{% url 'examen' %}">Autenticación</a>
       </li>
       <li class="nav-item">
         <a class="nav-link active" aria-current="true" href="{% url 'presentarexamen' %}">Presentar examen</a>
@@ -16,6 +16,7 @@
       </li>
     </ul>
   </div>
+
   <div class="card-body">
     <h5 class="card-title">Examen de {{ examen.planificacion.materia }} - Sección: {{ examen.planificacion.seccion }}</h5>
     <p class="card-text">Duración: {{ examen.duracion }} minutos | Número de intentos permitidos: {{ examen.nintentos }}</p>
@@ -26,9 +27,23 @@
     <form method="post">
       {% csrf_token %}
       {% for pregunta in preguntas %}
-        <div class="mb-4 text-left">
-          <label><strong>Pregunta {{ forloop.counter }}:</strong> {{ pregunta.texto }}</label>
-          <input type="text" name="respuesta_{{ pregunta.id }}" class="form-control" placeholder="Escribe tu respuesta aquí">
+        <div class="mb-4">
+          <!-- Título de la Pregunta -->
+          <div class="text-center mb-2">
+            <strong>Pregunta {{ forloop.counter }}:</strong> {{ pregunta.texto }}
+          </div>
+
+          <!-- Opciones centradas -->
+          <div class="d-flex justify-content-center">
+            <div class="row">
+              {% for opcion in pregunta.opciones.all %}
+                <div class="col-md-6 d-flex align-items-center mb-2">
+                  <input type="radio" id="opcion_{{ opcion.id }}" name="respuesta_{{ pregunta.id }}" value="{{ opcion.id }}" class="form-check-input me-2">
+                  <label for="opcion_{{ opcion.id }}" class="form-check-label">{{ opcion.texto }}</label>
+                </div>
+              {% endfor %}
+            </div>
+          </div>
         </div>
       {% endfor %}
       <button type="submit" class="btn btn-primary">Enviar respuestas</button>

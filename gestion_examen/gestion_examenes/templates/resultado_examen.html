@@ -1,0 +1,36 @@
+{% extends 'base_examen.html' %}
+{% load static %}
+
+{% block contenido %}
+<div class="card text-center">
+  <div class="card-header">
+    <h2>Resultados del Examen</h2>
+  </div>
+
+  <div class="card-body">
+    <h5 class="card-title">Examen de {{ examen.planificacion.materia }} - Sección: {{ examen.planificacion.seccion }}</h5>
+    <p class="card-text">Duración: {{ examen.duracion }} minutos</p>
+
+    <hr>
+
+    <h4>Tu Resultado:</h4>
+    <p><strong>Preguntas Correctas:</strong> {{ resultado.correctas }}</p>
+    <p><strong>Preguntas Incorrectas:</strong> {{ resultado.incorrectas }}</p>
+    <p><strong>Total de Preguntas:</strong> {{ resultado.total }}</p>
+    <p><strong>Porcentaje:</strong> {{ resultado.porcentaje }}%</p>
+
+    <hr>
+
+    <h5>Respuestas Detalladas:</h5>
+    <ul class="list-group">
+      {% for pregunta_id, opcion in respuestas.items %}
+        <li class="list-group-item">
+          <strong>Pregunta:</strong> {{ opcion.pregunta.texto }}<br>
+          <strong>Tu Respuesta:</strong> {{ opcion.texto }}<br>
+          <strong>Correcta:</strong> {{ opcion.es_correcta|yesno:"Sí,No" }}
+        </li>
+      {% endfor %}
+    </ul>
+  </div>
+</div>
+{% endblock contenido %}

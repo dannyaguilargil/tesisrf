@@ -4,8 +4,7 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.contrib import messages
 import os
 from django.contrib.auth import logout as django_logout
-# Create your views here.
-################LOGIN####################
+
 def home(request):
     if request.method == 'POST':
         form = AuthenticationForm(request, request.POST)
@@ -38,7 +37,7 @@ def home(request):
         form = AuthenticationForm()
 
     return render(request, 'home.html', {'form': form})
-################LOGIN####################
+
 
 #logout de la pagina
 def logout(request):

@@ -78,3 +78,29 @@ class pregunta(models.Model):
 
     def __str__(self):
         return f"Pregunta: {self.texto}"
+    
+
+class opcion(models.Model):
+    pregunta = models.ForeignKey(pregunta, on_delete=models.CASCADE, related_name='opciones')
+    texto = models.CharField(max_length=255, verbose_name='Texto de la opción')
+    es_correcta = models.BooleanField(default=False, verbose_name='Es la opción correcta')
+
+    def __str__(self):
+        return f"Opción: {self.texto} ({'Correcta' if self.es_correcta else 'Incorrecta'})"
+    
+class respuestaexamen(models.Model):
+    examen = models.ForeignKey(examen, on_delete=models.CASCADE)
+    usuario = models.ForeignKey(User, on_delete=models.CASCADE)
+    fecha_respuesta = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Examen de {self.examen.planificacion.materia} - Respuesta de {self.usuario}"
+
+class respuesta(models.Model):
+    respuesta_examen = models.ForeignKey(respuestaexamen, related_name='respuestas', on_delete=models.CASCADE)
+    pregunta = models.ForeignKey(pregunta, on_delete=models.CASCADE)
+    opcion_seleccionada = models.ForeignKey(opcion, on_delete=models.CASCADE)
+    es_correcta = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"Pregunta: {self.pregunta.texto} - Respuesta: {self.opcion_seleccionada.texto} - Correcta: {self.es_correcta}"

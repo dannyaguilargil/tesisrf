@@ -3,13 +3,14 @@ from django import forms
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.utils import timezone
-from .models import examen, pregunta
+from .models import examen, pregunta,opcion, respuestaexamen,respuesta
 import cv2
 import base64
 import numpy as np
 from django.core.files.base import ContentFile
 from gestion_usuarios.models import imagenes
-from .forms import ExamenForm, PreguntaForm
+from .forms import ExamenForm, PreguntaForm,OpcionForm
+from django.forms import modelformset_factory
 
 def staff_required(user):
     return user.is_staff 
@@ -70,7 +71,7 @@ def examenes(request):
                 correlacion = cv2.compareHist(hist_captura, hist_referencia, cv2.HISTCMP_CORREL)
 
              
-                if correlacion > 0.2: 
+                if correlacion > 0.1: 
                     return render(request, 'examenes.html', {
                         'examen': examen_obj,
                         'preguntas': pregunta.objects.filter(examen=examen_obj),
@@ -115,63 +116,129 @@ def examenes(request):
         })
 
 def presentarexamen(request):
-  
     username = request.user.username
     es_staff = request.user.is_staff
 
-
     fecha_actual = timezone.now().date()
 
- 
+    # Obtener el examen actual en función de la fecha
     examen_obj = examen.objects.filter(
-        fechainicio__lte=fecha_actual,   
-        fechafinal__gte=fecha_actual     
-    ).select_related('planificacion').first()  
+        fechainicio__lte=fecha_actual,
+        fechafinal__gte=fecha_actual
+    ).select_related('planificacion').first()
 
-    if examen_obj:
-       
-        preguntas = pregunta.objects.filter(examen=examen_obj)
-        return render(request, 'presentar_examen.html', {
-            'examen': examen_obj,
-            'preguntas': preguntas,
-            'username': username,
-            'es_staff': es_staff
-        })
-    else:
-        
+    if not examen_obj:
         return render(request, 'examen_no_disponible.html', {
             'mensaje': 'No hay exámenes disponibles en esta fecha.',
             'username': username,
             'es_staff': es_staff
         })
-    
+
+    # Obtener preguntas y opciones relacionadas
+    preguntas = pregunta.objects.filter(examen=examen_obj).prefetch_related('opciones')
+
+    if request.method == 'POST':
+        # Crear una nueva respuesta para el examen del estudiante
+        respuesta_examen = respuestaexamen.objects.create(
+            examen=examen_obj,
+            usuario=request.user
+        )
+
+        correctas = 0
+        # Procesar las respuestas enviadas
+        for pregunta_obj in preguntas:
+            respuesta_id = request.POST.get(f"respuesta_{pregunta_obj.id}")
+            if respuesta_id:
+                respuesta_opcion = opcion.objects.get(id=respuesta_id)
+                es_correcta = respuesta_opcion.es_correcta
+
+                # Guardar la respuesta
+                respuesta.objects.create(
+                    respuesta_examen=respuesta_examen,
+                    pregunta=pregunta_obj,
+                    opcion_seleccionada=respuesta_opcion,
+                    es_correcta=es_correcta
+                )
+
+                if es_correcta:
+                    correctas += 1
+
+        # Calcular resultado
+        total_preguntas = preguntas.count()
+        resultado = {
+            'correctas': correctas,
+            'incorrectas': total_preguntas - correctas,
+            'total': total_preguntas,
+            'porcentaje': (correctas / total_preguntas) * 100
+        }
+
+        return render(request, 'resultado_examen.html', {
+            'examen': examen_obj,
+            'resultado': resultado,
+            'username': username,
+        })
+
+    return render(request, 'presentar_examen.html', {
+        'examen': examen_obj,
+        'preguntas': preguntas,
+        'username': username,
+        'es_staff': es_staff
+    })
+
 @login_required
 def crear_examen(request):
-    
     username = request.user.username
     es_staff = request.user.is_staff
+
+    PreguntaFormSet = modelformset_factory(
+        pregunta,
+        form=PreguntaForm,
+        extra=1  # Número inicial de preguntas
+    )
+    OpcionFormSet = modelformset_factory(
+        opcion,
+        form=OpcionForm,
+        extra=4  # Número inicial de opciones por pregunta
+    )
+
     if request.method == 'POST':
         examen_form = ExamenForm(request.POST)
-        if examen_form.is_valid():
+        pregunta_formset = PreguntaFormSet(request.POST, prefix='preguntas')
+        opcion_formset = OpcionFormSet(request.POST, prefix='opciones')
+
+        if examen_form.is_valid() and pregunta_formset.is_valid() and opcion_formset.is_valid():
             # Guardar el examen
             nuevo_examen = examen_form.save()
 
-            # Crear preguntas automáticamente si se especifica una cantidad
-            cantidad_preguntas = nuevo_examen.cantidadpreguntas
+            # Guardar preguntas
             preguntas_creadas = []
-            for i in range(cantidad_preguntas):
-                preguntas_creadas.append(
-                    pregunta(examen=nuevo_examen, texto=f'Pregunta {i+1}')
-                )
-            pregunta.objects.bulk_create(preguntas_creadas)
+            for pregunta_form in pregunta_formset:
+                if pregunta_form.cleaned_data:
+                    nueva_pregunta = pregunta_form.save(commit=False)
+                    nueva_pregunta.examen = nuevo_examen
+                    nueva_pregunta.save()
+                    preguntas_creadas.append(nueva_pregunta)
 
-            return redirect('crear_examen')  # Redirige a una lista de exámenes o donde prefieras
+            # Guardar opciones
+            for opcion_form in opcion_formset:
+                if opcion_form.cleaned_data:
+                    nueva_opcion = opcion_form.save(commit=False)
+                    # Relacionar opción con la primera pregunta (puedes ajustar esto)
+                    if preguntas_creadas:
+                        nueva_opcion.pregunta = preguntas_creadas[0]
+                    nueva_opcion.save()
+
+            return redirect('crear_examen')
+
     else:
         examen_form = ExamenForm()
+        pregunta_formset = PreguntaFormSet(queryset=pregunta.objects.none(), prefix='preguntas')
+        opcion_formset = OpcionFormSet(queryset=opcion.objects.none(), prefix='opciones')
 
-    return render(request, 'crearexamen.html',{
+    return render(request, 'crearexamen.html', {
         'examen_form': examen_form,
+        'pregunta_formset': pregunta_formset,
+        'opcion_formset': opcion_formset,
         'username': username,
         'es_staff': es_staff,
-
     })

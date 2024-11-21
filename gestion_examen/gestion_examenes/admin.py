@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import  modalidad,semestre,carrera,materia,seccion,planificacion,examen,pregunta
+from .models import  modalidad,semestre,carrera,materia,seccion,planificacion,examen,pregunta,opcion,respuestaexamen,respuesta
 # Register your models here.
 class Modalidad(admin.ModelAdmin):
     list_display=('id', 'descripcion', 'fecha_creacion', 'fecha_actualizacion')
@@ -70,5 +70,21 @@ class Pregunta(admin.ModelAdmin):
     list_display=('examen', 'texto', 'fecha_actualizacion')
     search_fields = ('id',)
 admin.site.register(pregunta, Pregunta)
+
+class Opcion(admin.ModelAdmin):
+    list_display=('pregunta', 'texto', 'es_correcta')
+    search_fields = ('pregunta',)
+admin.site.register(opcion, Opcion)
+
+class RespuestaExamen(admin.ModelAdmin):
+    list_display=('examen', 'usuario', 'fecha_respuesta')
+    search_fields = ('examen',)
+admin.site.register(respuestaexamen, RespuestaExamen)
+
+class Respuesta(admin.ModelAdmin):
+    list_display=('respuesta_examen', 'pregunta', 'opcion_seleccionada','es_correcta')
+    search_fields = ('examen',)
+admin.site.register(respuesta, Respuesta)
+
 
 
