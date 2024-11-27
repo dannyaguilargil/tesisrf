@@ -6,7 +6,7 @@
   <div class="card-header">
     <ul class="nav nav-tabs card-header-tabs">
       <li class="nav-item">
-        <a class="nav-link"   href="{% url 'inicioexamen' %}">Inicio del sitio</a>
+        <a class="nav-link" href="{% url 'inicioexamen' %}">Inicio del sitio</a>
       </li>
       <li class="nav-item">
         <a class="nav-link" href="{% url 'examen' %}">Autenticación</a>
@@ -22,42 +22,49 @@
 
   <div class="card-body">
     <div class="container mt-4">
+      {% if messages %}
+      {% for message in messages %}
+        <div class="alert alert-success" role="alert">
+          {{ message }}
+        </div>
+      {% endfor %}
+    {% endif %}
       <h2 class="text-primary mb-4">Crear un Nuevo Examen</h2>
-      
+
       <form method="post" class="shadow p-4 bg-light rounded">
         {% csrf_token %}
-        
+
+        <!-- Detalles del Examen -->
+        <h4 class="text-secondary">Detalles del Examen</h4>
         <div class="mb-3">
-          {{ examen_form.fechainicio.label_tag }}
-          {{ examen_form.fechainicio }}
+          {{ examen_form.as_p }}
         </div>
-        
-        <div class="mb-3">
-          {{ examen_form.fechafinal.label_tag }}
-          {{ examen_form.fechafinal }}
-        </div>
-        
-        <div class="mb-3">
-          {{ examen_form.cantidadpreguntas.label_tag }}
-          {{ examen_form.cantidadpreguntas }}
-        </div>
-        
-        <div class="mb-3">
-          {{ examen_form.duracion.label_tag }}
-          {{ examen_form.duracion }}
-        </div>
-        
-        <div class="mb-3">
-          {{ examen_form.nintentos.label_tag }}
-          {{ examen_form.nintentos }}
-        </div>
-        
-        <div class="mb-3">
-          {{ examen_form.planificacion.label_tag }}
-          {{ examen_form.planificacion }}
-        </div>
-        
-        <button type="submit" class="btn btn-success w-40">Crear Examen</button>
+
+        <!-- Preguntas y Opciones -->
+        <h4 class="text-secondary">Preguntas</h4>
+        {{ pregunta_formset.management_form }}
+        {% for form in pregunta_formset %}
+          <div class="border p-3 mb-3 bg-white rounded">
+            <h5 class="text-info">Pregunta {{ forloop.counter }}</h5>
+            {{ form.as_p }}
+
+            <!-- Opciones relacionadas -->
+            <h6 class="text-muted">Opciones</h6>
+            <div>
+              {% for i in "1234"|slice:":" %}
+                <div class="mb-2">
+                  <label for="opcion_{{ forloop.counter }}">{{ i }}</label>
+                  <input type="text" name="opciones_{{ form.prefix }}" placeholder="Texto de la opción" class="form-control">
+                  <label>
+                    <input type="checkbox" name="es_correcta_{{ form.prefix }}"> Correcta
+                  </label>
+                </div>
+              {% endfor %}
+            </div>
+          </div>
+        {% endfor %}
+
+        <button type="submit" class="btn btn-success w-40">Guardar Examen</button>
       </form>
     </div>
   </div>

@@ -18,7 +18,8 @@
         <a class="nav-link" href="#">Presentar examen</a>
       </li>
       <li class="nav-item">
-        <a class="nav-link disabled" aria-disabled="true">Crear examen</a>
+        <!-- este debe llevar valiacion solo que puedan acceder los que son staff-->
+        <a class="nav-link" aria-disabled="true" href="{% url 'crear_examen' %}">Crear examen</a>
       </li>
     </ul>
   </div>

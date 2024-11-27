@@ -1,5 +1,10 @@
 from django.contrib import admin
 from .models import  modalidad,semestre,carrera,materia,seccion,planificacion,examen,pregunta,opcion,respuestaexamen,respuesta
+from django.contrib import admin
+from django.utils.html import format_html
+
+
+
 # Register your models here.
 class Modalidad(admin.ModelAdmin):
     list_display=('id', 'descripcion', 'fecha_creacion', 'fecha_actualizacion')

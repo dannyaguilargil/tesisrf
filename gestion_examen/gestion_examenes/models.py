@@ -104,3 +104,5 @@ class respuesta(models.Model):
 
     def __str__(self):
         return f"Pregunta: {self.pregunta.texto} - Respuesta: {self.opcion_seleccionada.texto} - Correcta: {self.es_correcta}"
+    
+ 

@@ -10,7 +10,9 @@ import numpy as np
 from django.core.files.base import ContentFile
 from gestion_usuarios.models import imagenes
 from .forms import ExamenForm, PreguntaForm,OpcionForm
+from django.forms import modelformset_factory, inlineformset_factory
 from django.forms import modelformset_factory
+from django.contrib import messages
 
 def staff_required(user):
     return user.is_staff 
@@ -217,50 +219,49 @@ def crear_examen(request):
     OpcionFormSet = modelformset_factory(
         opcion,
         form=OpcionForm,
-        extra=4  # Número inicial de opciones por pregunta
+        extra=4  # Número inicial de opciones
     )
 
     if request.method == 'POST':
         examen_form = ExamenForm(request.POST)
         pregunta_formset = PreguntaFormSet(request.POST, prefix='preguntas')
-        opcion_formset = OpcionFormSet(request.POST, prefix='opciones')
 
-        if examen_form.is_valid() and pregunta_formset.is_valid() and opcion_formset.is_valid():
+        if examen_form.is_valid() and pregunta_formset.is_valid():
             # Guardar el examen
             nuevo_examen = examen_form.save()
 
-            # Guardar preguntas
-            preguntas_creadas = []
+            # Procesar las preguntas
             for pregunta_form in pregunta_formset:
                 if pregunta_form.cleaned_data:
                     nueva_pregunta = pregunta_form.save(commit=False)
                     nueva_pregunta.examen = nuevo_examen
                     nueva_pregunta.save()
-                    preguntas_creadas.append(nueva_pregunta)
 
-            # Guardar opciones
-            for opcion_form in opcion_formset:
-                if opcion_form.cleaned_data:
-                    nueva_opcion = opcion_form.save(commit=False)
-                    # Relacionar opción con la primera pregunta (puedes ajustar esto)
-                    if preguntas_creadas:
-                        nueva_opcion.pregunta = preguntas_creadas[0]
-                    nueva_opcion.save()
+                    # Crear opciones para esta pregunta
+                    opciones_data = request.POST.getlist(f'opciones_{pregunta_form.prefix}')
+                    es_correcta_data = request.POST.getlist(f'es_correcta_{pregunta_form.prefix}')
 
-            return redirect('crear_examen')
+                    for texto, es_correcta in zip(opciones_data, es_correcta_data):
+                        nueva_opcion = opcion(
+                            pregunta=nueva_pregunta,
+                            texto=texto,
+                            es_correcta=(es_correcta == 'on')
+                        )
+                        nueva_opcion.save()
+            messages.success(request, "Examen creado con éxito.")
+            return redirect('crear_examen')  # Redirigir después de guardar
 
     else:
         examen_form = ExamenForm()
         pregunta_formset = PreguntaFormSet(queryset=pregunta.objects.none(), prefix='preguntas')
-        opcion_formset = OpcionFormSet(queryset=opcion.objects.none(), prefix='opciones')
 
     return render(request, 'crearexamen.html', {
         'examen_form': examen_form,
         'pregunta_formset': pregunta_formset,
-        'opcion_formset': opcion_formset,
         'username': username,
         'es_staff': es_staff,
     })
+
 
 @login_required
 def  inicioexamen(request):
