@@ -6,27 +6,37 @@
   <div class="card-header">
     <ul class="nav nav-tabs card-header-tabs">
         <li class="nav-item">
-            <a class="nav-link active" aria-current="true"  href="{% url 'inicioexamen' %}">Inicio del sitio</a>
+            <a class="nav-link active" aria-current="true" href="{% url 'inicioexamen' %}">Inicio del sitio</a>
           </li>
       <li class="nav-item">
         <a class="nav-link" href="{% url 'examen' %}">Autenticación</a>
       </li>
-
-     
       <li class="nav-item">
-      
         <a class="nav-link" href="#">Presentar examen</a>
       </li>
       <li class="nav-item">
-        <!-- este debe llevar valiacion solo que puedan acceder los que son staff-->
         <a class="nav-link" aria-disabled="true" href="{% url 'crear_examen' %}">Crear examen</a>
       </li>
     </ul>
   </div>
   <div class="card-body">
-   
     <h1>Inicio del sitio</h1>
-    <h5>No hay Examenes accedidos o creados recientemente</h5>
+    
+    {% if examenes %}
+      <h5>Historial de exámenes creados:</h5>
+      <ul class="list-group">
+        {% for examen in examenes %}
+          <li class="list-group-item">
+            <strong>{{ examen.planificacion }} </strong><br>
+            <small>Fecha de creación: {{ examen.fecha_creacion|date:"d M Y" }}</small><br>
+            <small>Fecha de inicio: {{ examen.fechainicio|date:"d M Y" }} - Fecha de fin: {{ examen.fechafinal|date:"d M Y" }}</small><br>
+            <small>Cantidad de preguntas: {{ examen.cantidadpreguntas }} | Intentos: {{ examen.nintentos }}</small>
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <h5>No hay exámenes accesibles o creados recientemente.</h5>
+    {% endif %}
   </div>
 </div>
 {% endblock contenido %}

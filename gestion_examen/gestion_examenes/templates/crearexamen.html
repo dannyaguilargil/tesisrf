@@ -23,12 +23,12 @@
   <div class="card-body">
     <div class="container mt-4">
       {% if messages %}
-      {% for message in messages %}
-        <div class="alert alert-success" role="alert">
-          {{ message }}
-        </div>
-      {% endfor %}
-    {% endif %}
+        {% for message in messages %}
+          <div class="alert alert-success" role="alert">
+            {{ message }}
+          </div>
+        {% endfor %}
+      {% endif %}
       <h2 class="text-primary mb-4">Crear un Nuevo Examen</h2>
 
       <form method="post" class="shadow p-4 bg-light rounded">
@@ -43,30 +43,71 @@
         <!-- Preguntas y Opciones -->
         <h4 class="text-secondary">Preguntas</h4>
         {{ pregunta_formset.management_form }}
-        {% for form in pregunta_formset %}
-          <div class="border p-3 mb-3 bg-white rounded">
-            <h5 class="text-info">Pregunta {{ forloop.counter }}</h5>
-            {{ form.as_p }}
+        <div id="preguntas_formset">
+          {% for form in pregunta_formset %}
+            <div class="border p-3 mb-3 bg-white rounded" data-form-id="{{ forloop.counter }}">
+              <h5 class="text-info">Pregunta {{ forloop.counter }}</h5>
+              {{ form.as_p }}
 
-            <!-- Opciones relacionadas -->
-            <h6 class="text-muted">Opciones</h6>
-            <div>
-              {% for i in "1234"|slice:":" %}
-                <div class="mb-2">
-                  <label for="opcion_{{ forloop.counter }}">{{ i }}</label>
-                  <input type="text" name="opciones_{{ form.prefix }}" placeholder="Texto de la opción" class="form-control">
-                  <label>
-                    <input type="checkbox" name="es_correcta_{{ form.prefix }}"> Correcta
-                  </label>
-                </div>
-              {% endfor %}
+              <!-- Opciones relacionadas -->
+              <h6 class="text-muted">Opciones</h6>
+              <div class="opciones" id="opciones_{{ form.prefix }}">
+                {% for i in "1234"|slice:":" %}
+                  <div class="mb-2">
+                    <label for="opcion_{{ form.prefix }}_{{ i }}">{{ i }}</label>
+                    <input type="text" name="opciones_{{ form.prefix }}_{{ i }}" placeholder="Texto de la opción" class="form-control" required>
+                    <label>
+                      <input type="checkbox" name="es_correcta_{{ form.prefix }}_{{ i }}"> Correcta
+                    </label>
+                  </div>
+                {% endfor %}
+              </div>
             </div>
-          </div>
-        {% endfor %}
+          {% endfor %}
+        </div>
 
         <button type="submit" class="btn btn-success w-40">Guardar Examen</button>
       </form>
+
+      <!-- Botón para agregar más preguntas -->
+      <button type="button" class="btn btn-primary mt-4" id="agregar_pregunta_btn">Agregar otra pregunta</button>
     </div>
   </div>
 </div>
+
+<script>
+  // JavaScript para agregar más preguntas dinámicamente
+  let preguntaFormCount = {{ pregunta_formset.management_form.total_form_count.value|default:0 }};
+  document.getElementById('agregar_pregunta_btn').addEventListener('click', function() {
+    preguntaFormCount++;
+    const preguntaFormset = document.getElementById('preguntas_formset');
+    
+    // Clonar la plantilla de la pregunta
+    const nuevaPregunta = preguntaFormset.querySelector('.border').cloneNode(true);
+    nuevaPregunta.dataset.formId = preguntaFormCount;
+    
+    // Actualizar los índices de los campos de formulario
+    const preguntaFormFields = nuevaPregunta.querySelectorAll('input, select, textarea');
+    preguntaFormFields.forEach(function(field) {
+      let name = field.name;
+      let id = field.id;
+      if (name) {
+        // Actualizamos el número de la pregunta en el nombre de los campos
+        field.name = name.replace(/-\d+-/, `-${preguntaFormCount}-`);
+      }
+      if (id) {
+        // Actualizamos el número de la pregunta en el ID de los campos
+        field.id = id.replace(/-\d+-/, `-${preguntaFormCount}-`);
+      }
+    });
+
+    // Cambiar el título de la pregunta
+    const preguntaTitulo = nuevaPregunta.querySelector('h5');
+    preguntaTitulo.textContent = `Pregunta ${preguntaFormCount}`;
+    
+    // Añadir la nueva pregunta al formset
+    preguntaFormset.appendChild(nuevaPregunta);
+  });
+</script>
+
 {% endblock contenido %}
